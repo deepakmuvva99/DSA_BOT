@@ -20,6 +20,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_TRACKER_FILE = os.path.join(BASE_DIR, "DSA_Master_Tracker.xlsx")
 
 
+def _normalize_tracker_url(url: str) -> str:
+    """
+    Accept normal Google Sheets share URLs and convert to direct xlsx export URL.
+    """
+    cleaned = url.strip()
+
+    # Google Sheets browser URL -> direct xlsx export URL
+    # Example: https://docs.google.com/spreadsheets/d/<ID>/edit?... -> /export?format=xlsx
+    if "docs.google.com/spreadsheets/d/" in cleaned and "/export?" not in cleaned:
+        parts = cleaned.split("/spreadsheets/d/", 1)[1]
+        sheet_id = parts.split("/", 1)[0]
+        return f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
+
+    return cleaned
+
+
 def _get_env(name: str, required: bool = True) -> str:
     value = os.getenv(name, "").strip()
     if required and not value:
@@ -36,7 +52,8 @@ def _resolve_tracker_path() -> str:
             )
         return LOCAL_TRACKER_FILE
 
-    response = requests.get(tracker_url, timeout=30)
+    resolved_url = _normalize_tracker_url(tracker_url)
+    response = requests.get(resolved_url, timeout=30)
     response.raise_for_status()
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
