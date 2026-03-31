@@ -1,0 +1,30 @@
+name: Daily DSA Telegram Reminder
+
+on:
+  schedule:
+    # 9:00 AM IST = 03:30 UTC
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-daily-reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily cloud job
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TRACKER_XLSX_URL: ${{ secrets.TRACKER_XLSX_URL }}
+        run: python cloud_runner.py

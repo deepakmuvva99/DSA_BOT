@@ -390,3 +390,9 @@ This system combines:
 Use `cloud_runner.py` + `render.yaml` to run daily reminders in Render so your laptop does not need to stay on.
 
 See `RENDER_SETUP.md` for full steps, including OneDrive-based Excel updates from phone/laptop.
+
+## ⚙️ Cloud Automation (GitHub Actions)
+
+Use `.github/workflows/daily-reminder.yml` for a no-card daily cloud run at 9:00 AM IST.
+
+See `GITHUB_ACTIONS_SETUP.md` for secrets setup and manual test run.
