@@ -84,5 +84,33 @@ def run_daily_job() -> None:
     print("Cloud job completed successfully.")
 
 
+def run_weekly_review_job() -> None:
+    bot_token = _get_env("TELEGRAM_BOT_TOKEN")
+    chat_id = _get_env("TELEGRAM_CHAT_ID")
+
+    tracker_path = _resolve_tracker_path()
+    print(f"Running weekly review job at {datetime.now().isoformat()}")
+
+    coach = DSAPreparationCoach(tracker_path)
+    report = coach.get_weekly_analytics()
+    exam = coach.generate_weekly_exam(question_count=8)
+
+    report_text = coach.format_weekly_report(report)
+    exam_text = coach.format_weekly_exam(exam)
+
+    notifier = TelegramNotifier(bot_token, chat_id)
+    ok_report = notifier.send_message(report_text)
+    ok_exam = notifier.send_message(exam_text)
+
+    if not (ok_report and ok_exam):
+        raise RuntimeError("Failed to send weekly report and/or weekly exam.")
+
+    print("Weekly review job completed successfully.")
+
+
 if __name__ == "__main__":
-    run_daily_job()
+    run_mode = os.getenv("RUN_MODE", "daily").strip().lower()
+    if run_mode == "weekly":
+        run_weekly_review_job()
+    else:
+        run_daily_job()

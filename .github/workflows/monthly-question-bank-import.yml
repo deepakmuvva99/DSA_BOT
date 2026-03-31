@@ -1,0 +1,51 @@
+name: Monthly Question Bank Import
+
+on:
+  schedule:
+    # 1st day of every month at 10:00 AM IST = 04:30 UTC
+    - cron: "30 4 1 * *"
+  workflow_dispatch:
+    inputs:
+      import_file:
+        description: "CSV path in repo (default imports/sample_new_questions.csv)"
+        required: false
+        default: "imports/sample_new_questions.csv"
+
+permissions:
+  contents: write
+
+jobs:
+  import-monthly-questions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run import pipeline
+        run: |
+          IMPORT_FILE="${{ github.event.inputs.import_file }}"
+          if [ -z "$IMPORT_FILE" ]; then
+            IMPORT_FILE="imports/sample_new_questions.csv"
+          fi
+          python question_bank_pipeline.py --tracker DSA_Master_Tracker.xlsx --import-file "$IMPORT_FILE"
+
+      - name: Commit updated tracker if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add DSA_Master_Tracker.xlsx
+          git commit -m "Monthly question bank auto-merge"
+          git push

@@ -396,3 +396,9 @@ See `RENDER_SETUP.md` for full steps, including OneDrive-based Excel updates fro
 Use `.github/workflows/daily-reminder.yml` for a no-card daily cloud run at 9:00 AM IST.
 
 See `GITHUB_ACTIONS_SETUP.md` for secrets setup and manual test run.
+
+## 🧠 Advanced Automation
+
+For smart revisions, Sunday analytics + exam, monthly question imports, and dashboard:
+
+See `ADVANCED_FEATURES.md`.
