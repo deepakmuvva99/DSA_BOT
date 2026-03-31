@@ -22,6 +22,26 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Health check (config + time)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TRACKER_XLSX_URL: ${{ secrets.TRACKER_XLSX_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import datetime, timezone
+
+          required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TRACKER_XLSX_URL"]
+          missing = [k for k in required if not os.getenv(k)]
+          now = datetime.now(timezone.utc).isoformat()
+          print(f"[health] UTC now: {now}")
+          if missing:
+              raise SystemExit(f"[health] Missing secrets: {', '.join(missing)}")
+          print("[health] All required secrets are present.")
+          print("[health] Job will now generate and send the daily plan.")
+          PY
+
       - name: Run daily cloud job
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
