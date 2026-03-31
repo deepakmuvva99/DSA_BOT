@@ -1,0 +1,14 @@
+services:
+  - type: cron
+    name: ai-coach-daily-reminder
+    runtime: python
+    schedule: "30 3 * * *"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python cloud_runner.py"
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: TRACKER_XLSX_URL
+        sync: false
